@@ -1,13 +1,12 @@
-# Etapa final: imagem mínima com Java 21
-FROM eclipse-temurin:21-jdk-alpine
-
+# Etapa 1: build com Maven
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copia o JAR do projeto (ajuste o nome do JAR se for diferente)
-COPY target/api-0.0.1-SNAPSHOT.jar app.jar
-
-# Porta padrão do Spring Boot
+# Etapa 2: imagem final
+FROM eclipse-temurin:21-jdk-alpine
+WORKDIR /app
+COPY --from=build /app/target/api-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-
-# Comando para iniciar a aplicação
 ENTRYPOINT ["java", "-jar", "app.jar"]
